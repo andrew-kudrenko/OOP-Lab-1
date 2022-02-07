@@ -7,9 +7,9 @@ namespace BookLibrary
 
     class Library
     {
-        public List<BookInfo> Books { get; }
+        private readonly List<BookInfo> books = new();
 
-        public List<BookInfo> GetAll() => Books;
+        public List<BookInfo> GetAll() => books;
 
         public void Remove(string id)
         {
@@ -18,27 +18,29 @@ namespace BookLibrary
 
             if (exists)
             {
-                var info = Books[index];
+                var info = books[index];
 
                 info.Item2--;
 
                 if (Empty(info))
                 {
-                    Books.RemoveAt(index);
+                    books.RemoveAt(index);
                 }
 
-                OnRemove(info);
+                OnRemove?.Invoke(info);
             }
         }
 
-        public void Add(ICreateBookDto from)
+        public Book Add(CreateBookDto from)
         {
             Book book = BookFactory.Create(from);
 
             var info = new BookInfo(book, 0);
             
-            Books.Add(info);
-            OnAdd(info);
+            books.Add(info);
+            OnAdd?.Invoke(info);
+
+            return book;
         }
 
         public void UpdateCount(string id, uint value)
@@ -47,8 +49,10 @@ namespace BookLibrary
 
             if (index != -1)
             {
-                var info = Books[index];
+                var info = books[index];
                 info.Item2 = value;
+
+                OnCountUpdated?.Invoke(info);
             }
         }
 
@@ -58,7 +62,9 @@ namespace BookLibrary
 
         public event InfoHandler OnRemove;
 
-        private int FindIndex(string id) => Books.FindIndex((b) => b.Item1.Id == id);
+        public event InfoHandler OnCountUpdated;
+
+        private int FindIndex(string id) => books.FindIndex((b) => b.Item1.Id == id);
         
         private static bool Empty(BookInfo info) => info.Item2 <= 0;
     }

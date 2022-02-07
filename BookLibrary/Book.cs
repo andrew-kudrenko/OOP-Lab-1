@@ -11,7 +11,7 @@
         public string PublishedAt { get; set; }
     }
 
-    interface ICreateBookDto
+    class CreateBookDto
     {
         public string Name { get; set; }
 
